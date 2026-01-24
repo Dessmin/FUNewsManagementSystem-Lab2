@@ -1,0 +1,6 @@
+services:
+  prn232.funewsmanagementsystem.api:
+    image: ${DOCKER_REGISTRY-}prn232funewsmanagementsystemapi
+    build:
+      context: .
+      dockerfile: PRN232.FUNewsManagementSystem.API/Dockerfile

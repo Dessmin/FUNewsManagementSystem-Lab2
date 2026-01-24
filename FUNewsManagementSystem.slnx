@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="PRN232.FUNewsManagementSystem.API/PRN232.FUNewsManagementSystem.API.csproj" />
+  <Project Path="PRN232.FUNewsManagementSystem.Repo/PRN232.FUNewsManagementSystem.Repo.csproj" />
+  <Project Path="PRN232.FUNewsManagementSystem.Services/PRN232.FUNewsManagementSystem.Services.csproj" />
+</Solution>
