@@ -68,6 +68,7 @@ public static class IocContainer
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IClaimsService, ClaimsService>();
+        services.AddScoped<ICategoryService, CategoryService>();
         return services;
     }
 
