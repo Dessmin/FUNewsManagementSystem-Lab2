@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PRN232.FUNewsManagementSystem.Services.Interfaces;
+using PRN232.FUNewsManagementSystem.Services.Services;
 using System.Text;
-
 
 public static class IocContainer
 {
@@ -65,6 +66,7 @@ public static class IocContainer
     public static IServiceCollection SetupBusinessServicesLayer(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IClaimsService, ClaimsService>();
         return services;
     }

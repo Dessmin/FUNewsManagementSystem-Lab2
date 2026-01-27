@@ -1,4 +1,4 @@
-using SwaggerThemes;
+﻿using SwaggerThemes;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,7 +11,27 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-// Add services to the container
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.SetupIocContainer();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins(
+                "http://localhost:3000",                             // Local fe development
+                "http://localhost:5173"                              // Vite default port
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -20,9 +40,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
-builder.Services.AddEndpointsApiExplorer();
+// Tắt việc map claim mặc định
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-// Session configuration
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -31,14 +53,27 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Setup IoC Container (includes DbContext, Swagger, JWT, Repositories, Services)
-builder.Services.SetupIocContainer();
-
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
-builder.WebHost.UseUrls("http://0.0.0.0:5000");
-
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 var app = builder.Build();
+
+// Apply database migrations before anything else
+app.Logger.LogInformation("Starting FUNewsManagementSystem API...");
+try
+{
+    app.ApplyMigrations(app.Logger);
+    app.Logger.LogInformation("Database migrations completed successfully");
+}
+catch (Exception e)
+{
+    app.Logger.LogCritical(e, "CRITICAL: Failed to apply database migrations. Application cannot start.");
+    throw; // Stop application if migrations fail
+}
+
+
+
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
@@ -46,28 +81,19 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FU News Management System API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FUNewsManagementSystem API v1");
         c.RoutePrefix = string.Empty;
-        c.DocumentTitle = "FU News Management System API";
         c.InjectStylesheet("/swagger-ui/custom-theme.css");
         c.HeadContent = $"<style>{SwaggerTheme.GetSwaggerThemeCss(Theme.Dracula)}</style>";
     });
 }
 
-// Apply migrations
-try
-{
-    app.ApplyMigrations(app.Logger);
-}
-catch (Exception e)
-{
-    app.Logger.LogError(e, "An error occurred during migration!");
-}
+app.UseCors("AllowFrontend");
 
-// Middleware pipeline - ORDER IS IMPORTANT
-app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseSession();
 
+app.Logger.LogInformation("FUNewsManagementSystem API is running on http://0.0.0.0:5000");
 app.Run();
