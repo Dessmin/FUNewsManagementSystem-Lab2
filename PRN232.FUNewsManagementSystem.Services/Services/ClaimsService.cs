@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-
 public class ClaimsService : IClaimsService
 {
     public ClaimsService(IHttpContextAccessor httpContextAccessor)
@@ -10,16 +9,17 @@ public class ClaimsService : IClaimsService
         var identity = httpContextAccessor.HttpContext?.User?.Identity as ClaimsIdentity;
 
         var extractedId = AuthenTools.GetCurrentUserId(identity);
-        if (Guid.TryParse(extractedId, out var parsedId))
+        if (int.TryParse(extractedId, out var parsedId))
             GetCurrentUserId = parsedId;
         else
-            GetCurrentUserId = Guid.Empty;
+            GetCurrentUserId = 0;
 
         IpAddress = httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
     }
 
-    public Guid GetCurrentUserId { get; }
+    public int GetCurrentUserId { get; }
 
     public string? IpAddress { get; }
 }
+
 

@@ -64,7 +64,8 @@ public static class IocContainer
 
     public static IServiceCollection SetupBusinessServicesLayer(this IServiceCollection services)
     {
-
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IClaimsService, ClaimsService>();
         return services;
     }
 
@@ -78,17 +79,7 @@ public static class IocContainer
             {
                 Title = "FU News Management System API",
                 Version = "v1",
-                Description = @"API for managing news articles, categories, tags, and user accounts in FU News Management System.
-                    
-                    **Architecture:**
-                    - 3-Layer Architecture (Presentation → Service → Repository)
-                    - Repository Pattern with Unit of Work
-                    - Entity Framework Core for OData support
-                    
-                    **Features:**
-                    - CRUD operations for News Articles, Categories, Tags, and Accounts
-                    - JWT Authentication & Authorization
-                    - Role-based access control (Admin, Staff, Lecturer)",
+                Description = @"API for managing news articles, categories, tags, and user accounts in FU News Management System.",
                 Contact = new OpenApiContact
                 {
                     Name = "FU News Team",
