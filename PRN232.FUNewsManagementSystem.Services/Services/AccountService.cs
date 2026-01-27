@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PRN232.FUNewsManagementSystem.Services.Interfaces;
-using PRN232.FUNewsManagementSystem.Services.Models.Business;
+using PRN232.FUNewsManagementSystem.Services.Models.Account;
 
 namespace PRN232.FUNewsManagementSystem.Services.Services;
 
@@ -51,10 +51,8 @@ public class AccountService : IAccountService
     {
         _logger.LogInformation($"Getting accounts with query: Page={query.Page}, PageSize={query.PageSize}");
 
-        // Get all accounts as queryable
         var accountsQuery = _unitOfWork.AccountRepository.GetAllAsQueryable();
 
-        // Apply search filter
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
             var searchTerm = query.SearchTerm.ToLower();
@@ -63,44 +61,27 @@ public class AccountService : IAccountService
                 (a.AccountEmail != null && a.AccountEmail.ToLower().Contains(searchTerm)));
         }
 
-        // Apply role filter
         if (query.AccountRole.HasValue)
         {
             accountsQuery = accountsQuery.Where(a => a.AccountRole == query.AccountRole.Value);
         }
 
-        // Apply sorting
-        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        if (query.IsDescending)
         {
-            accountsQuery = query.SortBy.ToLower() switch
-            {
-                "name" => query.IsDescending
-                    ? accountsQuery.OrderByDescending(a => a.AccountName)
-                    : accountsQuery.OrderBy(a => a.AccountName),
-                "email" => query.IsDescending
-                    ? accountsQuery.OrderByDescending(a => a.AccountEmail)
-                    : accountsQuery.OrderBy(a => a.AccountEmail),
-                "role" => query.IsDescending
-                    ? accountsQuery.OrderByDescending(a => a.AccountRole)
-                    : accountsQuery.OrderBy(a => a.AccountRole),
-                _ => accountsQuery.OrderBy(a => a.AccountID)
-            };
+            accountsQuery = accountsQuery.OrderByDescending(a => a.AccountID);
         }
         else
         {
             accountsQuery = accountsQuery.OrderBy(a => a.AccountID);
         }
 
-        // Get total count
         var totalCount = await accountsQuery.CountAsync();
 
-        // Apply pagination
         var accounts = await accountsQuery
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .ToListAsync();
 
-        // Convert to business models
         var accountModels = accounts.Select(a => new AccountModel
         {
             AccountID = a.AccountID,
@@ -121,14 +102,12 @@ public class AccountService : IAccountService
     {
         _logger.LogInformation($"Creating account: {model.AccountEmail}");
 
-        // Check if email already exists
         if (await _unitOfWork.AccountRepository.FirstOrDefaultAsync(a => a.AccountEmail == model.AccountEmail) != null)
         {
             _logger.LogWarning($"Email {model.AccountEmail} already exists");
             throw ErrorHelper.Conflict("Email already exists.");
         }
 
-        // Hash password
         var hashedPassword = new PasswordHasher<SystemAccount>().HashPassword(null, model.Password);
 
         var account = new SystemAccount
@@ -168,7 +147,6 @@ public class AccountService : IAccountService
             throw ErrorHelper.NotFound($"Account with ID {id} not found.");
         }
 
-        // Check if email is being changed and already exists
         if (model.AccountEmail != account.AccountEmail)
         {
             var existingAccount = await _unitOfWork.AccountRepository.FirstOrDefaultAsync(

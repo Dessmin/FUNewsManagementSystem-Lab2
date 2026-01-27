@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TripTogether.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,7 +74,8 @@ catch (Exception e)
 }
 
 
-
+// Middlewares
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())

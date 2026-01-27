@@ -5,10 +5,17 @@ namespace PRN232.FUNewsManagementSystem.API.Models.Request.Account;
 /// </summary>
 public class GetAccountsRequest
 {
-    public string? searchTerm { get; set; }
-    public int? accountRole { get; set; }
-    public string? sortBy { get; set; }
-    public bool isDescending { get; set; }
-    public int page { get; set; } = 1;
-    public int pageSize { get; set; } = 10;
+    public string? SearchTerm { get; set; }
+    public AccountRole? AccountRole { get; set; }
+    public bool IsDescending { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
+
+public enum AccountRole
+{
+    User = 0,
+    Staff = 1,
+    Lecturer = 2,
+    Student = 3
 }

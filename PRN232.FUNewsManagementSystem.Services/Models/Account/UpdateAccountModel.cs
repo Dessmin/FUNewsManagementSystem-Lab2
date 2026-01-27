@@ -1,4 +1,4 @@
-namespace PRN232.FUNewsManagementSystem.Services.Models.Business;
+namespace PRN232.FUNewsManagementSystem.Services.Models.Account;
 
 /// <summary>
 /// Business model for updating account (used in Service layer)
