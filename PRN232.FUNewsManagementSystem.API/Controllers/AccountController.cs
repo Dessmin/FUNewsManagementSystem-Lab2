@@ -4,7 +4,7 @@ using PRN232.FUNewsManagementSystem.API.Models.Request.Account;
 using PRN232.FUNewsManagementSystem.API.Models.Response.Account;
 using PRN232.FUNewsManagementSystem.API.Models.Response.Auth;
 using PRN232.FUNewsManagementSystem.Services.Interfaces;
-using PRN232.FUNewsManagementSystem.Services.Models.Business;
+using PRN232.FUNewsManagementSystem.Services.Models.Account;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PRN232.FUNewsManagementSystem.API.Controllers;
@@ -85,12 +85,11 @@ public class AccountController : ControllerBase
         {
             var queryModel = new AccountQueryModel
             {
-                SearchTerm = request.searchTerm,
-                AccountRole = request.accountRole,
-                SortBy = request.sortBy,
-                IsDescending = request.isDescending,
-                Page = request.page,
-                PageSize = request.pageSize
+                SearchTerm = request.SearchTerm,
+                AccountRole = (int?)request.AccountRole,
+                IsDescending = request.IsDescending,
+                Page = request.Page,
+                PageSize = request.PageSize
             };
 
             var paginatedResult = await _accountService.GetAccountsAsync(queryModel);
@@ -116,8 +115,7 @@ public class AccountController : ControllerBase
         catch (Exception ex)
         {
             var statusCode = ExceptionUtils.ExtractStatusCode(ex);
-            var errorResponse = ExceptionUtils.CreateErrorResponse<UserResponse>(ex);
-            return StatusCode(statusCode, errorResponse);
+            return StatusCode(statusCode, ExceptionUtils.CreateErrorResponse<AccountListResponse>(ex));
         }
     }
 
@@ -267,6 +265,7 @@ public class AccountController : ControllerBase
             0 => "User",
             1 => "Staff",
             2 => "Lecturer",
+            3 => "Student",
             _ => "Unknown"
         };
     }
