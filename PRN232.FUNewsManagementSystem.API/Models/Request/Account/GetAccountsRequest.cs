@@ -15,7 +15,7 @@ public class GetAccountsRequest
 public enum AccountRole
 {
     User = 0,
-    Staff = 1,
-    Lecturer = 2,
-    Student = 3
+    Admin = 1,
+    Staff = 2,
+    Lecturer = 3
 }

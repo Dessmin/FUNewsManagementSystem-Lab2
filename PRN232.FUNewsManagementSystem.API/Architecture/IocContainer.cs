@@ -180,14 +180,14 @@ public static class IocContainer
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("StudentPolicy", policy =>
-                policy.RequireRole("Student"));
+            options.AddPolicy("AdminPolicy", policy =>
+                policy.RequireRole("1"));
 
             options.AddPolicy("StaffPolicy", policy =>
-                policy.RequireRole("Staff"));
+                policy.RequireRole("2"));
 
             options.AddPolicy("LecturerPolicy", policy =>
-                policy.RequireRole("Lecturer"));
+                policy.RequireRole("3"));
         });
 
         return services;

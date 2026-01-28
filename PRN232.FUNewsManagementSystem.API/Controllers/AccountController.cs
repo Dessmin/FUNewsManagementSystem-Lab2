@@ -263,9 +263,9 @@ public class AccountController : ControllerBase
         return role switch
         {
             0 => "User",
-            1 => "Staff",
-            2 => "Lecturer",
-            3 => "Student",
+            1 => "Admin",
+            2 => "Staff",
+            3 => "Lecturer",
             _ => "Unknown"
         };
     }
