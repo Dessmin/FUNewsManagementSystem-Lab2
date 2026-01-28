@@ -137,7 +137,7 @@ public class TagController : ControllerBase
             NewsArticlesCount = tag.NewsArticlesCount
         };
 
-        return CreatedAtAction(nameof(GetTagByIdAsync), new { id = tag.TagID }, response);
+        return CreatedAtAction(null, new { id = tag.TagID }, response);
     }
 
     /// <summary>

@@ -186,8 +186,7 @@ public class CategoryController : ControllerBase
             NewsArticlesCount = category.NewsArticlesCount
         };
 
-        //return CreatedAtRoute(null, new { id = category.CategoryID }, response);
-        return StatusCode(201, response);
+        return CreatedAtAction(null, new { id = response.CategoryID }, response);
     }
 
     /// <summary>
