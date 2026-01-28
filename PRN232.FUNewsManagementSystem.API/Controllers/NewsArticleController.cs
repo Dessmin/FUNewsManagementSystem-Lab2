@@ -259,7 +259,7 @@ public class NewsArticleController : ControllerBase
             TagsCount = newsArticle.TagsCount
         };
 
-        return CreatedAtAction(nameof(GetNewsArticleByIdAsync), new { id = newsArticle.NewsArticleID }, response);
+        return CreatedAtAction(null, new { id = newsArticle.NewsArticleID }, response);
     }
 
     /// <summary>

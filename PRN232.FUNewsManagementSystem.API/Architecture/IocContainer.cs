@@ -70,6 +70,7 @@ public static class IocContainer
         services.AddScoped<IClaimsService, ClaimsService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ITagService, TagService>();
+        services.AddScoped<INewsArticleService, NewsArticleService>();
         return services;
     }
 
