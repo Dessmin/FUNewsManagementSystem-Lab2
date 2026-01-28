@@ -1,4 +1,4 @@
-using PRN232.FUNewsManagementSystem.Services.Models.Business;
+using PRN232.FUNewsManagementSystem.Services.Models.Account;
 
 namespace PRN232.FUNewsManagementSystem.Services.Interfaces;
 

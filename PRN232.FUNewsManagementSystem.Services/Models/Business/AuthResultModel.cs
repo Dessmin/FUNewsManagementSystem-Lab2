@@ -6,5 +6,4 @@ namespace PRN232.FUNewsManagementSystem.Services.Models.Business;
 public class AuthResultModel
 {
     public string AccessToken { get; set; } = null!;
-    public string RefreshToken { get; set; } = null!;
 }

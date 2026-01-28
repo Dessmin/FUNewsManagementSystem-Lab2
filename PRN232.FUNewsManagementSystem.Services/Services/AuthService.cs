@@ -86,14 +86,12 @@ public class AuthService : IAuthService
                 TimeSpan.FromMinutes(30)
             );
 
-            var refreshToken = Guid.NewGuid().ToString();
 
             _loggerService.LogInformation($"Tokens generated for {user.AccountEmail}");
 
             return new AuthResultModel
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
+                AccessToken = accessToken
             };
         }
         catch (Exception ex)

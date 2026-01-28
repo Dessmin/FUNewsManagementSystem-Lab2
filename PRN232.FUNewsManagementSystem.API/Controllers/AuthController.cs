@@ -112,8 +112,7 @@ namespace PRN232.FUNewsManagementSystem.API.Controllers
                 // Map Business Model to Response Model
                 var response = new LoginResponse
                 {
-                    AccessToken = authResult!.AccessToken,
-                    RefreshToken = authResult.RefreshToken
+                    AccessToken = authResult!.AccessToken
                 };
 
                 return Ok(ApiResult<LoginResponse>.Success(response, "200", "Login successful."));

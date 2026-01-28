@@ -69,6 +69,7 @@ public static class IocContainer
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IClaimsService, ClaimsService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ITagService, TagService>();
         return services;
     }
 
@@ -179,14 +180,14 @@ public static class IocContainer
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("AdminPolicy", policy =>
-                policy.RequireRole("Admin"));
+            options.AddPolicy("StudentPolicy", policy =>
+                policy.RequireRole("Student"));
 
             options.AddPolicy("StaffPolicy", policy =>
-                policy.RequireRole("Staff", "Admin"));
+                policy.RequireRole("Staff"));
 
             options.AddPolicy("LecturerPolicy", policy =>
-                policy.RequireRole("Lecturer", "Admin"));
+                policy.RequireRole("Lecturer"));
         });
 
         return services;
