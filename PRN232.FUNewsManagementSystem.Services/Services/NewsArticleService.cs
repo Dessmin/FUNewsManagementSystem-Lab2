@@ -270,6 +270,7 @@ public class NewsArticleService : INewsArticleService
         newsArticle.Headline = model.Headline;
         newsArticle.NewsContent = model.NewsContent;
         newsArticle.NewsSource = model.NewsSource;
+        newsArticle.Category = null;
         newsArticle.CategoryID = model.CategoryID;
         newsArticle.NewsStatus = model.NewsStatus;
         newsArticle.UpdatedByID = updatedByID;
