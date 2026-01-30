@@ -58,23 +58,39 @@ public class SystemController : ControllerBase
                 NewsArticles = 0
             };
 
-            // Seed System Accounts
-            var systemAccounts = await SeedSystemAccountsAsync();
-            seededCounts = seededCounts with { SystemAccounts = systemAccounts.Count };
+            // Use execution strategy to handle retries with transactions
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // Seed Categories
-            var categories = await SeedCategoriesAsync();
-            seededCounts = seededCounts with { Categories = categories.Count };
+                try
+                {
+                    // Seed System Accounts
+                    var systemAccounts = await SeedSystemAccountsAsync();
+                    seededCounts = seededCounts with { SystemAccounts = systemAccounts.Count };
 
-            // Seed Tags
-            var tags = await SeedTagsAsync();
-            seededCounts = seededCounts with { Tags = tags.Count };
+                    // Seed Categories
+                    var categories = await SeedCategoriesAsync();
+                    seededCounts = seededCounts with { Categories = categories.Count };
 
-            // Seed News Articles
-            var newsArticles = await SeedNewsArticlesAsync(systemAccounts, categories, tags);
-            seededCounts = seededCounts with { NewsArticles = newsArticles.Count };
+                    // Seed Tags
+                    var tags = await SeedTagsAsync();
+                    seededCounts = seededCounts with { Tags = tags.Count };
 
-            await _context.SaveChangesAsync();
+                    // Seed News Articles
+                    var newsArticles = await SeedNewsArticlesAsync(systemAccounts, categories, tags);
+                    seededCounts = seededCounts with { NewsArticles = newsArticles.Count };
+
+                    // Commit the transaction
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
 
             _logger.LogInformation("Data seeding completed successfully");
 
@@ -294,7 +310,8 @@ public class SystemController : ControllerBase
             await _context.NewsArticles.AddAsync(newsArticle);
         }
 
-        await _context.SaveChangesAsync(); // Save news articles first to get IDs
+        // Save news articles first to get IDs for NewsTag relationships
+        await _context.SaveChangesAsync();
 
         // Add tags to news articles
         for (var i = 0; i < newsArticles.Count; i++)

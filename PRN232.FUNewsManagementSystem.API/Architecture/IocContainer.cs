@@ -57,6 +57,7 @@ public static class IocContainer
         services.AddDbContext<NewsManagementDbContext>(options =>
             options.UseSqlServer(connectionString,
                 sql => sql.MigrationsAssembly(typeof(NewsManagementDbContext).Assembly.FullName)
+                         .EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null)
             )
         );
 
