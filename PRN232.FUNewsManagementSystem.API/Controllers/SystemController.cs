@@ -22,6 +22,97 @@ public class SystemController : ControllerBase
     }
 
     /// <summary>
+    /// Clear all data from the database
+    /// </summary>
+    /// <returns>Success message with cleared data count</returns>
+    [HttpDelete("clear-data")]
+    [SwaggerOperation(
+        Summary = "Clear all data from database",
+        Description = "Removes all data from the database including news articles, tags, categories, and system accounts. Use with caution! No authorization required."
+    )]
+    [SwaggerResponse(200, "Data cleared successfully")]
+    [SwaggerResponse(500, "Internal server error")]
+    public async Task<IActionResult> ClearDataAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Starting data clearing process...");
+
+            var deletedCounts = new
+            {
+                NewsTags = 0,
+                NewsArticles = 0,
+                Tags = 0,
+                Categories = 0,
+                SystemAccounts = 0
+            };
+
+            // Use execution strategy to handle retries with transactions
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    // Delete in correct order to respect foreign key constraints
+
+                    // 1. Delete NewsTags (junction table)
+                    var newsTags = await _context.NewsTags.ToListAsync();
+                    _context.NewsTags.RemoveRange(newsTags);
+                    await _context.SaveChangesAsync();
+                    deletedCounts = deletedCounts with { NewsTags = newsTags.Count };
+
+                    // 2. Delete NewsArticles
+                    var newsArticles = await _context.NewsArticles.ToListAsync();
+                    _context.NewsArticles.RemoveRange(newsArticles);
+                    await _context.SaveChangesAsync();
+                    deletedCounts = deletedCounts with { NewsArticles = newsArticles.Count };
+
+                    // 3. Delete Tags
+                    var tags = await _context.Tags.ToListAsync();
+                    _context.Tags.RemoveRange(tags);
+                    await _context.SaveChangesAsync();
+                    deletedCounts = deletedCounts with { Tags = tags.Count };
+
+                    // 4. Delete Categories (subcategories first, then parents)
+                    var categories = await _context.Categories.OrderByDescending(c => c.ParentCategoryID).ToListAsync();
+                    _context.Categories.RemoveRange(categories);
+                    await _context.SaveChangesAsync();
+                    deletedCounts = deletedCounts with { Categories = categories.Count };
+
+                    // 5. Delete SystemAccounts
+                    var accounts = await _context.SystemAccounts.ToListAsync();
+                    _context.SystemAccounts.RemoveRange(accounts);
+                    await _context.SaveChangesAsync();
+                    deletedCounts = deletedCounts with { SystemAccounts = accounts.Count };
+
+                    // Commit the transaction
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
+
+            _logger.LogInformation("Data clearing completed successfully");
+
+            return Ok(new
+            {
+                Message = "Database cleared successfully",
+                DeletedData = deletedCounts
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during data clearing");
+            return StatusCode(500, new { Message = "An error occurred while clearing data", Error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Seed all initial data including categories, tags, system accounts, and news articles
     /// </summary>
     /// <returns>Success message with seeded data count</returns>

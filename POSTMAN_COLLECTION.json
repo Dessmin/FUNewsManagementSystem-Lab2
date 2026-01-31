@@ -1,0 +1,3548 @@
+{
+	"info": {
+		"_postman_id": "funews-api-collection-2024",
+		"name": "FU News Management System API - Complete Test Suite",
+		"description": "Complete test suite for FU News Management System API with 145+ test cases and automated validation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminEmail",
+			"value": "admin@funews.edu.vn",
+			"type": "string"
+		},
+		{
+			"key": "adminPassword",
+			"value": "Admin123!",
+			"type": "string"
+		},
+		{
+			"key": "staffEmail",
+			"value": "staff@funews.edu.vn",
+			"type": "string"
+		},
+		{
+			"key": "staffPassword",
+			"value": "Staff123!",
+			"type": "string"
+		},
+		{
+			"key": "lecturerEmail",
+			"value": "john.lecturer@funews.edu.vn",
+			"type": "string"
+		},
+		{
+			"key": "lecturerPassword",
+			"value": "Lecturer123!",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "0. Setup & Seed",
+			"item": [
+				{
+					"name": "TC-SYS-SEED-001: Seed Data - Success (First Time)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData).to.have.property('seededData');",
+									"});",
+									"",
+									"pm.test(\"Database seeded successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('seeded successfully');",
+									"    pm.expect(jsonData.seededData.systemAccounts).to.eql(5);",
+									"    pm.expect(jsonData.seededData.categories).to.eql(9);",
+									"    pm.expect(jsonData.seededData.tags).to.eql(10);",
+									"    pm.expect(jsonData.seededData.newsArticles).to.eql(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/system/seed",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "system", "seed"]
+						}
+					}
+				},
+				{
+					"name": "TC-SYS-CLEAR-001: Clear Data - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData).to.have.property('deletedData');",
+									"});",
+									"",
+									"pm.test(\"Database cleared successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('cleared successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/system/clear-data",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "system", "clear-data"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "TC-AUTH-LOGIN-001: Login - Success (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has API Result structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData).to.have.property('statusCode');",
+									"    pm.expect(jsonData).to.have.property('message');",
+									"    pm.expect(jsonData).to.have.property('isSuccess');",
+									"});",
+									"",
+									"pm.test(\"Login successful with access token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('Login successful');",
+									"    pm.expect(jsonData.data).to.have.property('accessToken');",
+									"    pm.expect(jsonData.data.accessToken).to.not.be.empty;",
+									"});",
+									"",
+									"// Save the access token for subsequent requests",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"accessToken\", jsonData.data.accessToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "TC-AUTH-LOGIN-002: Login - Fail (Invalid Credentials)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Error message about invalid credentials\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"    pm.expect(jsonData.message).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@funews.edu.vn\",\n  \"password\": \"WrongPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "TC-AUTH-LOGIN-003: Login - Invalid (Malformed Email)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Validation error returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"not-an-email\",\n  \"password\": \"Admin123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "TC-AUTH-REG-001: Register - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"User registered successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('registered successfully');",
+									"    pm.expect(jsonData.data).to.have.property('accountID');",
+									"    pm.expect(jsonData.data).to.have.property('accountName');",
+									"    pm.expect(jsonData.data).to.have.property('accountEmail');",
+									"    pm.expect(jsonData.data).to.have.property('accountRole');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"Test User\",\n  \"email\": \"testuser@funews.edu.vn\",\n  \"password\": \"Test123!\",\n  \"accountRole\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "TC-AUTH-REG-002: Register - Fail (Duplicate Email)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Error about duplicate email\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"    pm.expect(jsonData.message).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"Duplicate User\",\n  \"email\": \"admin@funews.edu.vn\",\n  \"password\": \"Test123!\",\n  \"accountRole\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "TC-AUTH-REG-003: Register - Invalid (Missing Required Fields)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Validation errors returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"\",\n  \"email\": \"invalid-email\",\n  \"password\": \"123\",\n  \"accountRole\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Accounts",
+			"item": [
+				{
+					"name": "TC-ACC-GETID-001: Get Account by ID - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Account retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('accountID');",
+									"    pm.expect(jsonData.data).to.have.property('accountName');",
+									"    pm.expect(jsonData.data).to.have.property('accountEmail');",
+									"    pm.expect(jsonData.data).to.have.property('accountRole');",
+									"    pm.expect(jsonData.data).to.have.property('accountRoleName');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-GETID-002: Get Account by ID - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message about account not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-GETID-003: Get Account by ID - Invalid (No Authorization)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-001: Get Accounts - Success (All Accounts)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated list returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('items');",
+									"    pm.expect(jsonData.data).to.have.property('totalItems');",
+									"    pm.expect(jsonData.data).to.have.property('page');",
+									"    pm.expect(jsonData.data).to.have.property('pageSize');",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-002: Get Accounts - Success (With Pagination)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Correct page size returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.pageSize).to.eql(2);",
+									"    pm.expect(jsonData.data.items.length).to.be.at.most(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?page=1&pageSize=2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-003: Get Accounts - Success (Search by Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Search results match criteria\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?searchTerm=Admin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "Admin"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-004: Get Accounts - Success (Filter by Role)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Only admin accounts returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.data.items.forEach(function(account) {",
+									"        pm.expect(account.accountRole).to.eql(1);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?accountRole=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "accountRole",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-005: Get Accounts - Success (Sort Descending)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Accounts sorted in descending order\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?isDescending=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "isDescending",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-006: Get Accounts - Success (Combined Filters)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Combined filters applied correctly\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('items');",
+									"    pm.expect(jsonData.data.pageSize).to.eql(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?searchTerm=Staff&accountRole=2&page=1&pageSize=5&isDescending=false",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "Staff"
+								},
+								{
+									"key": "accountRole",
+									"value": "2"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "5"
+								},
+								{
+									"key": "isDescending",
+									"value": "false"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-007: Get Accounts - Success (Empty Results)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Empty results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.items).to.be.an('array').that.is.empty;",
+									"    pm.expect(jsonData.data.totalItems).to.eql(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?searchTerm=NonExistentUser",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "NonExistentUser"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-LIST-008: Get Accounts - Invalid (Page Out of Range)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Validation error returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts?page=-1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"],
+							"query": [
+								{
+									"key": "page",
+									"value": "-1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-CREATE-001: Create Account - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Account created successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('created successfully');",
+									"    pm.expect(jsonData.data).to.have.property('accountID');",
+									"    pm.expect(jsonData.data.accountName).to.eql('New Staff Member');",
+									"    pm.expect(jsonData.data.accountRole).to.eql(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"New Staff Member\",\n  \"accountEmail\": \"newstaff@funews.edu.vn\",\n  \"password\": \"NewStaff123!\",\n  \"accountRole\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-CREATE-002: Create Account - Fail (Duplicate Email)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Error about duplicate email\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"Duplicate Account\",\n  \"accountEmail\": \"admin@funews.edu.vn\",\n  \"password\": \"Test123!\",\n  \"accountRole\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-CREATE-003: Create Account - Invalid (Missing Required Fields)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Validation errors returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"\",\n  \"accountEmail\": \"invalid-email\",\n  \"password\": \"weak\",\n  \"accountRole\": 99\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-UPDATE-001: Update Account - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Account updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('updated successfully');",
+									"    pm.expect(jsonData.data.accountID).to.eql(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"John Lecturer Updated\",\n  \"accountEmail\": \"john.lecturer.updated@funews.edu.vn\",\n  \"accountRole\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/3",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "3"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-UPDATE-002: Update Account - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error about account not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"Updated Name\",\n  \"accountEmail\": \"updated@funews.edu.vn\",\n  \"accountRole\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-UPDATE-003: Update Account - Invalid (Email Already Exists)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Error about email already exists\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountName\": \"John Lecturer\",\n  \"accountEmail\": \"admin@funews.edu.vn\",\n  \"accountRole\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/3",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "3"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-DELETE-001: Delete Account - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Account deleted successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/6",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "6"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-DELETE-002: Delete Account - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error about account not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isSuccess).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-ACC-DELETE-003: Delete Account - Invalid (Unauthorized)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accounts/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "accounts", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Categories",
+			"item": [
+				{
+					"name": "TC-CAT-GETID-001: Get Category by ID - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Category retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('categoryID');",
+									"    pm.expect(jsonData).to.have.property('categoryName');",
+									"    pm.expect(jsonData).to.have.property('categoryDescription');",
+									"    pm.expect(jsonData).to.have.property('isActive');",
+									"    pm.expect(jsonData.categoryID).to.eql(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-GETID-002: Get Category by ID - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-GETID-003: Get Category by ID - Invalid (No Authorization)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-001: Get Categories - Success (All Categories)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated list returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('items');",
+									"    pm.expect(jsonData).to.have.property('totalItems');",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-002: Get Categories - Success (With Pagination)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Correct page size returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.pageSize).to.eql(3);",
+									"    pm.expect(jsonData.items.length).to.be.at.most(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?page=1&pageSize=3",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "3"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-003: Get Categories - Success (Search by Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Search results match criteria\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?searchTerm=Academic",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "Academic"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-004: Get Categories - Success (Filter by Active Status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Only active categories returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.items.forEach(function(category) {",
+									"        pm.expect(category.isActive).to.be.true;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?isActive=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "isActive",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-005: Get Categories - Success (Filter by Parent Category)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Subcategories returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?parentCategoryID=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "parentCategoryID",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-006: Get Categories - Success (Include Subcategories)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"All categories including subcategories returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?includeSubCategories=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "includeSubCategories",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-007: Get Categories - Success (Sort by Name Descending)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Categories sorted descending\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?sortBy=name&isDescending=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "sortBy",
+									"value": "name"
+								},
+								{
+									"key": "isDescending",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-008: Get Categories - Success (Combined Filters)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Combined filters applied correctly\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"    pm.expect(jsonData.pageSize).to.eql(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?searchTerm=Student&isActive=true&page=1&pageSize=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "Student"
+								},
+								{
+									"key": "isActive",
+									"value": "true"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-LIST-010: Get Categories - Success (Empty Results)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Empty results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories?searchTerm=NonExistentCategory",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "NonExistentCategory"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-SUB-001: Get Subcategories - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Subcategories returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/1/subcategories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "1", "subcategories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-SUB-002: Get Subcategories - Fail (Parent Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/9999/subcategories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "9999", "subcategories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-SUB-003: Get Subcategories - Success (Empty Results)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Empty array returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/3/subcategories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "3", "subcategories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-CREATE-001: Create Category - Success (Parent Category)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Category created successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('categoryID');",
+									"    pm.expect(jsonData.categoryName).to.eql('New Category');",
+									"    pm.expect(jsonData.isActive).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryName\": \"New Category\",\n  \"categoryDescription\": \"Description for new category\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-CREATE-002: Create Category - Fail (Duplicate Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryName\": \"Academic\",\n  \"categoryDescription\": \"Duplicate category\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-CREATE-003: Create Category - Invalid (Missing Required Fields)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryName\": \"\",\n  \"categoryDescription\": \"\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-UPDATE-001: Update Category - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Category updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.categoryID).to.eql(1);",
+									"    pm.expect(jsonData.categoryName).to.eql('Academic Updated');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryName\": \"Academic Updated\",\n  \"categoryDescription\": \"Updated description for academic category\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-UPDATE-002: Update Category - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryName\": \"Updated Category\",\n  \"categoryDescription\": \"Updated description\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-UPDATE-003: Update Category - Invalid (Duplicate Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryName\": \"Academic\",\n  \"categoryDescription\": \"Description\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "2"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-DELETE-001: Delete Category - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Category deleted successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "10"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-DELETE-002: Delete Category - Fail (Has Subcategories)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-CAT-DELETE-003: Delete Category - Invalid (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "categories", "9999"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Tags",
+			"item": [
+				{
+					"name": "TC-TAG-GETID-001: Get Tag by ID - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Tag retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('tagID');",
+									"    pm.expect(jsonData).to.have.property('tagName');",
+									"    pm.expect(jsonData).to.have.property('note');",
+									"    pm.expect(jsonData.tagID).to.eql(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-GETID-002: Get Tag by ID - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-GETID-003: Get Tag by ID - Invalid (No Authorization)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-001: Get Tags - Success (All Tags)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated list returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('items');",
+									"    pm.expect(jsonData).to.have.property('totalItems');",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-002: Get Tags - Success (With Pagination)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Correct page size returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.pageSize).to.eql(5);",
+									"    pm.expect(jsonData.items.length).to.be.at.most(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?page=1&pageSize=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-003: Get Tags - Success (Search by Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Search results match criteria\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?searchTerm=exam",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "exam"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-004: Get Tags - Success (Sort by Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Tags sorted by name\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?sortBy=name&isDescending=false",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "sortBy",
+									"value": "name"
+								},
+								{
+									"key": "isDescending",
+									"value": "false"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-005: Get Tags - Success (Sort Descending)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Tags sorted descending\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?sortBy=name&isDescending=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "sortBy",
+									"value": "name"
+								},
+								{
+									"key": "isDescending",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-006: Get Tags - Success (Combined Search and Pagination)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Combined filters applied\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.pageSize).to.eql(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?searchTerm=tion&page=1&pageSize=3",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "tion"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "3"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-007: Get Tags - Success (Page 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Second page returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.page).to.eql(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?page=2&pageSize=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "pageSize",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-LIST-008: Get Tags - Success (Empty Search Results)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Empty results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags?searchTerm=NonExistentTag",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "NonExistentTag"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-CREATE-001: Create Tag - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Tag created successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('tagID');",
+									"    pm.expect(jsonData.tagName).to.eql('workshop');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagName\": \"workshop\",\n  \"note\": \"Workshop and training events\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-CREATE-002: Create Tag - Fail (Duplicate Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagName\": \"announcement\",\n  \"note\": \"Duplicate tag\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-CREATE-003: Create Tag - Invalid (Missing Required Fields)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagName\": \"\",\n  \"note\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-UPDATE-001: Update Tag - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Tag updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.tagID).to.eql(1);",
+									"    pm.expect(jsonData.tagName).to.eql('announcement-updated');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagName\": \"announcement-updated\",\n  \"note\": \"Updated general announcements\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-UPDATE-002: Update Tag - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagName\": \"updated-tag\",\n  \"note\": \"Updated note\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/categories/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-UPDATE-003: Update Tag - Invalid (Duplicate Name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tagName\": \"announcement\",\n  \"note\": \"Trying to use existing name\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "2"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-DELETE-001: Delete Tag - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Tag deleted successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/11",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "11"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-DELETE-002: Delete Tag - Fail (Has Associated News)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-TAG-DELETE-003: Delete Tag - Invalid (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tags/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tags", "9999"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. News Articles",
+			"item": [
+				{
+					"name": "TC-NEWS-GETID-001: Get News Article by ID - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"News article retrieved successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('newsArticleID');",
+									"    pm.expect(jsonData).to.have.property('newsTitle');",
+									"    pm.expect(jsonData).to.have.property('headline');",
+									"    pm.expect(jsonData).to.have.property('newsContent');",
+									"    pm.expect(jsonData).to.have.property('categoryName');",
+									"    pm.expect(jsonData.newsArticleID).to.eql(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-GETID-002: Get News Article by ID - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-GETID-003: Get News Article by ID - Invalid (No Authorization)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-001: Get News Articles - Success (All Articles)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paginated list returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('items');",
+									"    pm.expect(jsonData).to.have.property('totalItems');",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-002: Get News Articles - Success (With Pagination)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Correct page size returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.pageSize).to.eql(3);",
+									"    pm.expect(jsonData.items.length).to.be.at.most(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?page=1&pageSize=3",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "3"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-003: Get News Articles - Success (Search by Title)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Search results match criteria\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?searchTerm=Academic",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "Academic"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-004: Get News Articles - Success (Filter by Status)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Only published articles returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.items.forEach(function(article) {",
+									"        pm.expect(article.newsStatus).to.be.true;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?newsStatus=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "newsStatus",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-005: Get News Articles - Success (Filter by Category)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Articles in specified category returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.items.forEach(function(article) {",
+									"        pm.expect(article.categoryID).to.eql(1);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?categoryID=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "categoryID",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-006: Get News Articles - Success (Filter by Author)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Articles by specified author returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.items.forEach(function(article) {",
+									"        pm.expect(article.createdByID).to.eql(2);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?createdByID=2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "createdByID",
+									"value": "2"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-007: Get News Articles - Success (Filter by Date Range)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Articles in date range returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?createdDateFrom=2024-01-01&createdDateTo=2024-12-31",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "createdDateFrom",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "createdDateTo",
+									"value": "2024-12-31"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-008: Get News Articles - Success (Sort by Date Descending)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Articles sorted by date descending\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?sortBy=date&isDescending=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "sortBy",
+									"value": "date"
+								},
+								{
+									"key": "isDescending",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-009: Get News Articles - Success (Combined Filters)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Combined filters applied correctly\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array');",
+									"    pm.expect(jsonData.pageSize).to.eql(5);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?searchTerm=Student&newsStatus=true&categoryID=2&page=1&pageSize=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "Student"
+								},
+								{
+									"key": "newsStatus",
+									"value": "true"
+								},
+								{
+									"key": "categoryID",
+									"value": "2"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-LIST-010: Get News Articles - Success (Empty Results)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Empty results returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.items).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles?searchTerm=NonExistentArticle",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"],
+							"query": [
+								{
+									"key": "searchTerm",
+									"value": "NonExistentArticle"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-CAT-001: Get News by Category - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"News articles by category returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/category/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "category", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-CAT-002: Get News by Category - Fail (Category Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/category/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "category", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-AUTH-001: Get News by Author - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"News articles by author returned\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/author/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "author", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-AUTH-002: Get News by Author - Fail (Author Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/author/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "author", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-CREATE-001: Create News Article - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"News article created successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('newsArticleID');",
+									"    pm.expect(jsonData.newsTitle).to.eql('New Campus Facility Opening');",
+									"    pm.expect(jsonData.categoryID).to.eql(2);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newsTitle\": \"New Campus Facility Opening\",\n  \"headline\": \"State-of-the-art learning center to open next month\",\n  \"newsContent\": \"The university is proud to announce the opening of a new state-of-the-art learning center that will provide students with modern facilities for collaborative learning and research.\",\n  \"newsSource\": \"Campus Development Office\",\n  \"categoryID\": 2,\n  \"newsStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-CREATE-002: Create News Article - Fail (Invalid Category)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newsTitle\": \"Test Article\",\n  \"headline\": \"Test headline\",\n  \"newsContent\": \"Test content\",\n  \"newsSource\": \"Test Source\",\n  \"categoryID\": 9999,\n  \"newsStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-CREATE-003: Create News Article - Invalid (Missing Required Fields)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newsTitle\": \"\",\n  \"headline\": \"\",\n  \"newsContent\": \"\",\n  \"newsSource\": \"\",\n  \"categoryID\": 0,\n  \"newsStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-UPDATE-001: Update News Article - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"News article updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.newsArticleID).to.eql(1);",
+									"    pm.expect(jsonData.newsTitle).to.eql('Updated Academic Year Registration');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newsTitle\": \"Updated Academic Year Registration\",\n  \"headline\": \"Updated: Students can now register for the upcoming academic year\",\n  \"newsContent\": \"Updated content about registration portal...\",\n  \"newsSource\": \"Academic Office\",\n  \"categoryID\": 1,\n  \"newsStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-UPDATE-002: Update News Article - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newsTitle\": \"Updated Article\",\n  \"headline\": \"Updated headline\",\n  \"newsContent\": \"Updated content\",\n  \"newsSource\": \"Source\",\n  \"categoryID\": 1,\n  \"newsStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "9999"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-UPDATE-003: Update News Article - Invalid (Invalid Category)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newsTitle\": \"Updated Article\",\n  \"headline\": \"Updated headline\",\n  \"newsContent\": \"Updated content\",\n  \"newsSource\": \"Source\",\n  \"categoryID\": 9999,\n  \"newsStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "1"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-DELETE-001: Delete News Article - Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"News article deleted successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/6",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "6"]
+						}
+					}
+				},
+				{
+					"name": "TC-NEWS-DELETE-002: Delete News Article - Fail (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/news-articles/9999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "news-articles", "9999"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
