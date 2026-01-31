@@ -1,0 +1,522 @@
+{
+  "info": {
+    "name": "FU News Management System API - Test Cases",
+    "description": "Comprehensive test cases for all API endpoints with pass/fail assertions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "pm.test(\"Response is success\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.isSuccess).to.be.true;",
+                  "});",
+                  "pm.test(\"Response has account data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.value).to.have.property('data');",
+                  "    pm.expect(jsonData.value.data).to.have.property('accountID');",
+                  "    pm.expect(jsonData.value.data).to.have.property('accountName');",
+                  "    pm.expect(jsonData.value.data).to.have.property('accountEmail');",
+                  "});",
+                  "pm.test(\"Email matches request\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.value.data.accountEmail).to.equal('testuser@funews.edu.vn');",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('createdAccountID', jsonData.value.data.accountID);",
+                  "    pm.environment.set('createdAccountName', jsonData.value.data.accountName);",
+                  "    pm.environment.set('createdAccountEmail', jsonData.value.data.accountEmail);",
+                  "    console.log('Account ID saved: ' + jsonData.value.data.accountID);",
+                  "} else {",
+                  "    console.log('Register failed with status: ' + pm.response.code);",
+                  "    console.log('Response: ' + JSON.stringify(pm.response.json()));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Test User\",\n  \"email\": \"testuser@funews.edu.vn\",\n  \"password\": \"TestPass123!\",\n  \"accountRole\": 0\n}"},
+            "url": {"raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"]}
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Invalid Email Format",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n    pm.expect(jsonData.errors).to.have.property('Email');\n});\n"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Test User\",\n  \"email\": \"invalid-email\",\n  \"password\": \"TestPass123!\",\n  \"accountRole\": 0\n}"}, "url": {"raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"]}},
+          "response": []
+        },
+        {
+          "name": "Register - Duplicate Email",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 409 Conflict\", function () {\n    pm.expect(pm.response.code).to.equal(409);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.false;\n    pm.expect(jsonData).to.have.property('error');\n    pm.expect(jsonData.error).to.have.property('code');\n});\n"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Admin User\",\n  \"email\": \"admin@funews.edu.vn\",\n  \"password\": \"TestPass123!\",\n  \"accountRole\": 0\n}"}, "url": {"raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"]}},
+          "response": []
+        },
+        {
+          "name": "Login - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\npm.test(\"Response has access token\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value).to.have.property('data');\n    pm.expect(jsonData.value.data).to.have.property('accessToken');\n    pm.expect(jsonData.value.data.accessToken).to.not.be.empty;\n});\nif (pm.response.code === 200) {\n    var jsonData = pm.response.json();\n    pm.environment.set('token', jsonData.value.data.accessToken);\n    pm.test('Token saved to environment', function() {\n        pm.expect(pm.environment.get('token')).to.not.be.empty;\n    });\n}\n"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"admin@funews.edu.vn\",\n  \"password\": \"Admin123!\"\n}"}, "url": {"raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"]}},
+          "response": []
+        },
+        {
+          "name": "Login - Invalid Password",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 401 Unauthorized\", function () {\n    pm.expect(pm.response.code).to.equal(401);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.false;\n    pm.expect(jsonData).to.have.property('error');\n});\n"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"admin@funews.edu.vn\",\n  \"password\": \"WrongPassword123!\"\n}"}, "url": {"raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"]}},
+          "response": []
+        },
+        {
+          "name": "Login - User Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"notexist@funews.edu.vn\",\n  \"password\": \"Password123!\"\n}"}, "url": {"raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"]}},
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Get Account by ID - Success",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var accountID = pm.environment.get('createdAccountID');",
+                  "console.log('Pre-request: createdAccountID = ' + accountID);",
+                  "if (!accountID || accountID === '') {",
+                  "    console.warn('WARNING: createdAccountID is empty or not set. Make sure to run Register - Success first.');",
+                  "}"
+                ]
+              }
+            },
+            {"listen": "test", "script": {"exec": ["var accountID = pm.environment.get('createdAccountID');\npm.test('Account ID variable exists', function() {\n    pm.expect(accountID).to.not.be.undefined;\n    pm.expect(accountID).to.be.greaterThan(0);\n    console.log('Using account ID: ' + accountID);\n});\npm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\npm.test(\"Response has account data\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.isSuccess) {\n        pm.expect(jsonData.value.data).to.have.property('accountID');\n        pm.expect(jsonData.value.data).to.have.property('accountName');\n        pm.expect(jsonData.value.data).to.have.property('accountEmail');\n    }\n});\n"]}}
+          ],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts/{{createdAccountID}}", "host": ["{{base_url}}"], "path": ["api", "accounts", "{{createdAccountID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Get Account by ID - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.false;\n    pm.expect(jsonData).to.have.property('error');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts/99999", "host": ["{{base_url}}"], "path": ["api", "accounts", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Get Account by ID - Invalid ID Format",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has error structure\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts/abc", "host": ["{{base_url}}"], "path": ["api", "accounts", "abc"]}},
+          "response": []
+        },
+        {
+          "name": "Get All Accounts - Default",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\npm.test(\"Response has pagination data\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data).to.have.property('items');\n    pm.expect(jsonData.value.data).to.have.property('page');\n    pm.expect(jsonData.value.data).to.have.property('pageSize');\n});\npm.test(\"Items is an array\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data.items).to.be.an('array');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts", "host": ["{{base_url}}"], "path": ["api", "accounts"]}},
+          "response": []
+        },
+        {
+          "name": "Get All Accounts - Search by Name",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Search results contain 'Admin'\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.value.data.items.length > 0) {\n        var hasAdmin = jsonData.value.data.items.some(a => a.accountName.includes('Admin'));\n        pm.expect(hasAdmin).to.be.true;\n    }\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts?searchTerm=Admin", "host": ["{{base_url}}"], "path": ["api", "accounts"], "query": [{"key": "searchTerm", "value": "Admin"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All Accounts - Filter by Role Admin (1)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"All items have role 1\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.value.data.items.length > 0) {\n        jsonData.value.data.items.forEach(function(item) {\n            pm.expect(item.accountRole).to.equal(1);\n        });\n    }\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts?accountRole=1", "host": ["{{base_url}}"], "path": ["api", "accounts"], "query": [{"key": "accountRole", "value": "1"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All Accounts - Sort Descending",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Results returned\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data.items.length).to.be.greaterThanOrEqual(0);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts?isDescending=true", "host": ["{{base_url}}"], "path": ["api", "accounts"], "query": [{"key": "isDescending", "value": "true"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All Accounts - Pagination Page 1",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Pagination page is 1 with size 5\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data.page).to.equal(1);\n    pm.expect(jsonData.value.data.pageSize).to.equal(5);\n});\npm.test(\"Item count ≤ page size\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data.items.length).to.be.lessThanOrEqual(5);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/accounts?page=1&pageSize=5", "host": ["{{base_url}}"], "path": ["api", "accounts"], "query": [{"key": "page", "value": "1"}, {"key": "pageSize", "value": "5"}]}},
+          "response": []
+        },
+        {
+          "name": "Create Account - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 201 Created\", function () {\n    pm.expect(pm.response.code).to.equal(201);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\npm.test(\"Response has account data with ID\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data).to.have.property('accountID');\n    pm.expect(jsonData.value.data.accountName).to.equal('New Account');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"New Account\",\n  \"accountEmail\": \"newaccount@funews.edu.vn\",\n  \"password\": \"NewPass123!\",\n  \"accountRole\": 0\n}"}, "url": {"raw": "{{base_url}}/api/accounts", "host": ["{{base_url}}"], "path": ["api", "accounts"]}},
+          "response": []
+        },
+        {
+          "name": "Create Account - Invalid Email",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Invalid User\",\n  \"accountEmail\": \"invalid-email\",\n  \"password\": \"NewPass123!\",\n  \"accountRole\": 0\n}"}, "url": {"raw": "{{base_url}}/api/accounts", "host": ["{{base_url}}"], "path": ["api", "accounts"]}},
+          "response": []
+        },
+        {
+          "name": "Create Account - Duplicate Email",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 409 Conflict\", function () {\n    pm.expect(pm.response.code).to.equal(409);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.false;\n    pm.expect(jsonData).to.have.property('error');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Admin Duplicate\",\n  \"accountEmail\": \"admin@funews.edu.vn\",\n  \"password\": \"NewPass123!\",\n  \"accountRole\": 0\n}"}, "url": {"raw": "{{base_url}}/api/accounts", "host": ["{{base_url}}"], "path": ["api", "accounts"]}},
+          "response": []
+        },
+        {
+          "name": "Update Account - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\npm.test(\"Updated data returned correctly\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data.accountName).to.equal('Updated Name');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Updated Name\",\n  \"accountEmail\": \"updated@funews.edu.vn\",\n  \"accountRole\": 2\n}"}, "url": {"raw": "{{base_url}}/api/accounts/{{createdAccountID}}", "host": ["{{base_url}}"], "path": ["api", "accounts", "{{createdAccountID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Update Account - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404 Not Found\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.false;\n    pm.expect(jsonData).to.have.property('error');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"Updated Name\",\n  \"accountEmail\": \"updated@funews.edu.vn\",\n  \"accountRole\": 2\n}"}, "url": {"raw": "{{base_url}}/api/accounts/99999", "host": ["{{base_url}}"], "path": ["api", "accounts", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Update Account - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"accountName\": \"\",\n  \"accountEmail\": \"invalid-email\",\n  \"accountRole\": 5\n}"}, "url": {"raw": "{{base_url}}/api/accounts/{{createdAccountID}}", "host": ["{{base_url}}"], "path": ["api", "accounts", "{{createdAccountID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Account - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/accounts/{{createdAccountID}}", "host": ["{{base_url}}"], "path": ["api", "accounts", "{{createdAccountID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Account - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404 Not Found\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.false;\n    pm.expect(jsonData).to.have.property('error');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/accounts/99999", "host": ["{{base_url}}"], "path": ["api", "accounts", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Account - Invalid ID Format",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has error structure\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/accounts/abc", "host": ["{{base_url}}"], "path": ["api", "accounts", "abc"]}},
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create Category - Success",
+          "event": [{"listen": "prerequest", "script": {"exec": ["var uniqueName = 'New Category ' + Date.now();\npm.environment.set('createdCategoryName', uniqueName);\nconsole.log('Generated category name: ' + uniqueName);\n"]}}, {"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();\npm.test(\"Status code is 201 Created\", function () {\n    pm.expect(pm.response.code).to.equal(201);\n});\npm.test(\"Response has category properties\", function () {\n    pm.expect(jsonData).to.have.property('categoryID');\n    pm.expect(jsonData).to.have.property('categoryName');\n    pm.expect(jsonData.categoryName).to.equal(pm.environment.get('createdCategoryName'));\n});\npm.test(\"Category ID is captured\", function () {\n    pm.expect(jsonData.categoryID).to.be.a('number');\n    pm.expect(jsonData.categoryID).to.be.greaterThan(0);\n});\nif (pm.response.code === 201) {\n    pm.environment.set('createdCategoryID', jsonData.categoryID);\n    pm.environment.set('createdCategoryName', jsonData.categoryName);\n    console.log('Category ID saved: ' + jsonData.categoryID);\n}\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"categoryName\": \"{{createdCategoryName}}\",\n  \"categoryDescription\": \"Description for new category\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"}, "url": {"raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"]}},
+          "response": []
+        },
+        {
+          "name": "Get Category by ID - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories/99999", "host": ["{{base_url}}"], "path": ["api", "categories", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Get Category by ID - Invalid ID Format",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404 Not Found\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories/abc", "host": ["{{base_url}}"], "path": ["api", "categories", "abc"]}},
+          "response": []
+        },
+        {
+          "name": "Get All Categories - Default",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has categories array\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('categories');\n    pm.expect(jsonData.categories).to.be.an('array');\n});\npm.test(\"Response has message\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('message');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"]}},
+          "response": []
+        },
+        {
+          "name": "Get All Categories - Search by Name",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Search results contain 'Academic'\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.categories.length > 0) {\n        var hasMatch = jsonData.categories.some(c => c.categoryName.includes('Academic'));\n        pm.expect(hasMatch).to.be.true;\n    }\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories?searchTerm=Academic", "host": ["{{base_url}}"], "path": ["api", "categories"], "query": [{"key": "searchTerm", "value": "Academic"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All Categories - Filter Active Only",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"All items are active\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.categories.length > 0) {\n        jsonData.categories.forEach(function(item) {\n            pm.expect(item.isActive).to.be.true;\n        });\n    }\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories?isActive=true", "host": ["{{base_url}}"], "path": ["api", "categories"], "query": [{"key": "isActive", "value": "true"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All Categories - Sort & Pagination",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Items count within limit\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.categories.length).to.be.lessThanOrEqual(5);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories?sortBy=CategoryName&isDescending=true&page=1&pageSize=5", "host": ["{{base_url}}"], "path": ["api", "categories"], "query": [{"key": "sortBy", "value": "CategoryName"}, {"key": "isDescending", "value": "true"}, {"key": "page", "value": "1"}, {"key": "pageSize", "value": "5"}]}},
+          "response": []
+        },
+        {
+          "name": "Get Category by ID - Success",
+          "event": [{"listen": "prerequest", "script": {"exec": ["var categoryID = pm.environment.get('createdCategoryID');\nconsole.log('Pre-request: createdCategoryID = ' + categoryID);\nif (!categoryID || categoryID === '') {\n    console.warn('WARNING: createdCategoryID is empty. Make sure to run Create Category - Success first.');\n}\n"]}}, {"listen": "test", "script": {"exec": ["var categoryID = pm.environment.get('createdCategoryID');\npm.test('Category ID variable exists', function() {\n    pm.expect(categoryID).to.not.be.undefined;\n    pm.expect(categoryID).to.be.greaterThan(0);\n    console.log('Using category ID: ' + categoryID);\n});\npm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has category properties\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('categoryID');\n    pm.expect(jsonData).to.have.property('categoryName');\n    pm.expect(jsonData).to.have.property('isActive');\n});\npm.test(\"Category name is correct\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.categoryName).to.equal(pm.environment.get('createdCategoryName'));\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/categories/{{createdCategoryID}}", "host": ["{{base_url}}"], "path": ["api", "categories", "{{createdCategoryID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Create Category - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"categoryName\": \"\",\n  \"categoryDescription\": \"Description\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"}, "url": {"raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"]}},
+          "response": []
+        },
+        {
+          "name": "Create Category - Duplicate Name",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"categoryName\": \"{{createdCategoryName}}\",\n  \"categoryDescription\": \"Duplicate Category Name\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"}, "url": {"raw": "{{base_url}}/api/categories", "host": ["{{base_url}}"], "path": ["api", "categories"]}},
+          "response": []
+        },
+        {
+          "name": "Update Category - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Updated category data returned\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('categoryID');\n    pm.expect(jsonData).to.have.property('categoryName');\n    pm.expect(jsonData.categoryName).to.equal('Updated Academic');\n    pm.environment.set('createdCategoryName', jsonData.categoryName);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"categoryName\": \"Updated Academic\",\n  \"categoryDescription\": \"Updated description\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"}, "url": {"raw": "{{base_url}}/api/categories/{{createdCategoryID}}", "host": ["{{base_url}}"], "path": ["api", "categories", "{{createdCategoryID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Update Category - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"categoryName\": \"Updated\",\n  \"categoryDescription\": \"Updated description\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"}, "url": {"raw": "{{base_url}}/api/categories/99999", "host": ["{{base_url}}"], "path": ["api", "categories", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Update Category - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"categoryName\": \"\",\n  \"categoryDescription\": \"\",\n  \"parentCategoryID\": null,\n  \"isActive\": true\n}"}, "url": {"raw": "{{base_url}}/api/categories/{{createdCategoryID}}", "host": ["{{base_url}}"], "path": ["api", "categories", "{{createdCategoryID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Category - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has success message\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('message');\n    pm.expect(jsonData.message).to.equal('Category deleted successfully');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/categories/{{createdCategoryID}}", "host": ["{{base_url}}"], "path": ["api", "categories", "{{createdCategoryID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Category - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/categories/99999", "host": ["{{base_url}}"], "path": ["api", "categories", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Category - Has Sub Categories",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/categories/{{createdCategoryID}}", "host": ["{{base_url}}"], "path": ["api", "categories", "{{createdCategoryID}}"]}},
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tags",
+      "item": [
+        {
+          "name": "Create Tag - Success",
+          "event": [{"listen": "prerequest", "script": {"exec": ["var uniqueTagName = 'testtag' + Date.now();\npm.environment.set('createdTagName', uniqueTagName);\nconsole.log('Generated tag name: ' + uniqueTagName);\n"]}}, {"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();\npm.test(\"Status code is 201 Created\", function () {\n    pm.expect(pm.response.code).to.equal(201);\n});\npm.test(\"Response has tag properties\", function () {\n    pm.expect(jsonData).to.have.property('tagID');\n    pm.expect(jsonData).to.have.property('tagName');\n    pm.expect(jsonData.tagName).to.equal(pm.environment.get('createdTagName'));\n});\npm.test(\"Tag ID is captured\", function () {\n    pm.expect(jsonData.tagID).to.be.a('number');\n    pm.expect(jsonData.tagID).to.be.greaterThan(0);\n});\nif (pm.response.code === 201) {\n    pm.environment.set('createdTagID', jsonData.tagID);\n    pm.environment.set('createdTagName', jsonData.tagName);\n    console.log('Tag ID saved: ' + jsonData.tagID);\n}\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"tagName\": \"{{createdTagName}}\",\n  \"note\": \"New tag for testing\"\n}"}, "url": {"raw": "{{base_url}}/api/tags", "host": ["{{base_url}}"], "path": ["api", "tags"]}},
+          "response": []
+        },
+        {
+          "name": "Get Tag by ID - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/tags/99999", "host": ["{{base_url}}"], "path": ["api", "tags", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Get Tag by ID - Invalid ID Format",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404 Not Found\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/tags/abc", "host": ["{{base_url}}"], "path": ["api", "tags", "abc"]}},
+          "response": []
+        },
+        {
+          "name": "Get All Tags - Default",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has tags and message\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('tags');\n    pm.expect(jsonData).to.have.property('message');\n});\npm.test(\"Tags is an array\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.tags).to.be.an('array');\n});\npm.test(\"Message indicates success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.message.toLowerCase()).to.include('successfully');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/tags", "host": ["{{base_url}}"], "path": ["api", "tags"]}},
+          "response": []
+        },
+        {
+          "name": "Get All Tags - Search & Pagination",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Tags is an array\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.tags).to.be.an('array');\n});\npm.test(\"Search term found in results (if any)\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.tags.length > 0) {\n        var hasMatch = jsonData.tags.some(t => t.tagName.toLowerCase().includes('announcement'));\n        pm.expect(hasMatch).to.be.true;\n    }\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/tags?searchTerm=announcement&sortBy=TagName&isDescending=false&page=1&pageSize=5", "host": ["{{base_url}}"], "path": ["api", "tags"], "query": [{"key": "searchTerm", "value": "announcement"}, {"key": "sortBy", "value": "TagName"}, {"key": "isDescending", "value": "false"}, {"key": "page", "value": "1"}, {"key": "pageSize", "value": "5"}]}},
+          "response": []
+        },
+        {
+          "name": "Get Tag by ID - Success",
+          "event": [{"listen": "prerequest", "script": {"exec": ["var tagID = pm.environment.get('createdTagID');\nconsole.log('Pre-request: createdTagID = ' + tagID);\nif (!tagID || tagID === '') {\n    console.warn('WARNING: createdTagID is empty. Run Create Tag - Success first.');\n}\n"]}}, {"listen": "test", "script": {"exec": ["var tagID = pm.environment.get('createdTagID');\npm.test('Tag ID variable exists', function() {\n    pm.expect(tagID).to.not.be.undefined;\n    pm.expect(tagID).to.be.greaterThan(0);\n});\npm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has tag properties\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('tagID');\n    pm.expect(jsonData).to.have.property('tagName');\n    pm.expect(jsonData.tagName).to.equal(pm.environment.get('createdTagName'));\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/tags/{{createdTagID}}", "host": ["{{base_url}}"], "path": ["api", "tags", "{{createdTagID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Create Tag - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"tagName\": \"\",\n  \"note\": \"Empty tag name\"\n}"}, "url": {"raw": "{{base_url}}/api/tags", "host": ["{{base_url}}"], "path": ["api", "tags"]}},
+          "response": []
+        },
+        {
+          "name": "Create Tag - Duplicate Name",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"tagName\": \"{{createdTagName}}\",\n  \"note\": \"Duplicate tag\"\n}"}, "url": {"raw": "{{base_url}}/api/tags", "host": ["{{base_url}}"], "path": ["api", "tags"]}},
+          "response": []
+        },
+        {
+          "name": "Update Tag - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Updated tag data returned\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('tagID');\n    pm.expect(jsonData).to.have.property('tagName');\n    pm.expect(jsonData.tagName).to.equal('updated-tag');\n    pm.environment.set('createdTagName', jsonData.tagName);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"tagName\": \"updated-tag\",\n  \"note\": \"Updated tag note\"\n}"}, "url": {"raw": "{{base_url}}/api/tags/{{createdTagID}}", "host": ["{{base_url}}"], "path": ["api", "tags", "{{createdTagID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Update Tag - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"tagName\": \"updated\",\n  \"note\": \"Updated note\"\n}"}, "url": {"raw": "{{base_url}}/api/tags/99999", "host": ["{{base_url}}"], "path": ["api", "tags", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Update Tag - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"tagName\": \"\",\n  \"note\": \"Invalid data\"\n}"}, "url": {"raw": "{{base_url}}/api/tags/{{createdTagID}}", "host": ["{{base_url}}"], "path": ["api", "tags", "{{createdTagID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Tag - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has success message\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('message');\n    pm.expect(jsonData.message.toLowerCase()).to.include('deleted successfully');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/tags/{{createdTagID}}", "host": ["{{base_url}}"], "path": ["api", "tags", "{{createdTagID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Tag - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/tags/99999", "host": ["{{base_url}}"], "path": ["api", "tags", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Delete Tag - Has Associated News",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/tags/{{createdTagID}}", "host": ["{{base_url}}"], "path": ["api", "tags", "{{createdTagID}}"]}},
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "News Articles",
+      "item": [
+        {
+          "name": "Create News Article - Success",
+          "event": [{"listen": "prerequest", "script": {"exec": ["var uniqueTitle = 'News Article ' + Date.now();\npm.environment.set('createdNewsArticleTitle', uniqueTitle);\nconsole.log('Generated article title: ' + uniqueTitle);\n"]}}, {"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();\npm.test(\"Status code is 201 Created\", function () {\n    pm.expect(pm.response.code).to.equal(201);\n});\npm.test(\"Response has article properties\", function () {\n    pm.expect(jsonData).to.have.property('newsArticleID');\n    pm.expect(jsonData).to.have.property('newsTitle');\n    pm.expect(jsonData.newsTitle).to.equal(pm.environment.get('createdNewsArticleTitle'));\n});\npm.test(\"Article ID is captured\", function () {\n    pm.expect(jsonData.newsArticleID).to.be.a('number');\n    pm.expect(jsonData.newsArticleID).to.be.greaterThan(0);\n});\nif (pm.response.code === 201) {\n    pm.environment.set('createdNewsArticleID', jsonData.newsArticleID);\n    pm.environment.set('createdNewsArticleTitle', jsonData.newsTitle);\n    console.log('News Article ID saved: ' + jsonData.newsArticleID);\n}\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"{{createdNewsArticleTitle}}\",\n  \"headline\": \"Faculty achieves major research milestone\",\n  \"newsContent\": \"Content about the research breakthrough...\",\n  \"newsSource\": \"Research Department\",\n  \"categoryID\": {{createdCategoryID}},\n  \"newsStatus\": 1\n}"}, "url": {"raw": "{{base_url}}/api/news-articles", "host": ["{{base_url}}"], "path": ["api", "news-articles"]}},
+          "response": []
+        },
+        {
+          "name": "Get News Article by ID - Success",
+          "event": [{"listen": "prerequest", "script": {"exec": ["var articleID = pm.environment.get('createdNewsArticleID');\nconsole.log('Pre-request: createdNewsArticleID = ' + articleID);\nif (!articleID || articleID === '') {\n    console.warn('WARNING: createdNewsArticleID is empty. Run Create News Article - Success first.');\n}\n"]}}, {"listen": "test", "script": {"exec": ["var articleID = pm.environment.get('createdNewsArticleID');\npm.test('Article ID variable exists', function() {\n    pm.expect(articleID).to.not.be.undefined;\n    pm.expect(parseInt(articleID)).to.be.greaterThan(0);\n});\npm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has article properties\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('newsArticleID');\n    pm.expect(jsonData).to.have.property('newsTitle');\n    pm.expect(jsonData).to.have.property('newsContent');\n    pm.expect(jsonData.newsTitle).to.equal(pm.environment.get('createdNewsArticleTitle'));\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles/{{createdNewsArticleID}}", "host": ["{{base_url}}"], "path": ["api", "news-articles", "{{createdNewsArticleID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Get News Article by ID - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles/99999", "host": ["{{base_url}}"], "path": ["api", "news-articles", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Get News Article by ID - Invalid ID Format",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 404 Not Found\", function () {\n    pm.expect(pm.response.code).to.equal(404);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles/abc", "host": ["{{base_url}}"], "path": ["api", "news-articles", "abc"]}},
+          "response": []
+        },
+        {
+          "name": "Get All News Articles - Default",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has newsArticles and message\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('newsArticles');\n    pm.expect(jsonData).to.have.property('message');\n});\npm.test(\"Response has pagination structure\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.newsArticles).to.have.property('items');\n    pm.expect(jsonData.newsArticles).to.have.property('page');\n    pm.expect(jsonData.newsArticles.items).to.be.an('array');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles", "host": ["{{base_url}}"], "path": ["api", "news-articles"]}},
+          "response": []
+        },
+        {
+          "name": "Get All News Articles - Search & Pagination",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Search results contain search term (if any)\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.newsArticles.items.length > 0) {\n        var hasMatch = jsonData.newsArticles.items.some(n => n.newsTitle.toLowerCase().includes('academic'));\n        pm.expect(hasMatch).to.be.true;\n    }\n});\npm.test(\"Pagination page 1 with size 5\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.newsArticles.page).to.equal(1);\n    pm.expect(jsonData.newsArticles.pageSize).to.equal(5);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles?searchTerm=Academic&sortBy=CreatedDate&isDescending=true&page=1&pageSize=5", "host": ["{{base_url}}"], "path": ["api", "news-articles"], "query": [{"key": "searchTerm", "value": "Academic"}, {"key": "sortBy", "value": "CreatedDate"}, {"key": "isDescending", "value": "true"}, {"key": "page", "value": "1"}, {"key": "pageSize", "value": "5"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All News Articles - Filter by Status & Category",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Filtered results returned\", function () {\n    var jsonData = pm.response.json();\n    if (jsonData.newsArticles.items.length > 0) {\n        jsonData.newsArticles.items.forEach(function(item) {\n            pm.expect(item.newsStatus).to.equal(1);\n            pm.expect(item.categoryID).to.equal(parseInt(pm.environment.get('createdCategoryID')));\n        });\n    }\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles?newsStatus=1&categoryID={{createdCategoryID}}", "host": ["{{base_url}}"], "path": ["api", "news-articles"], "query": [{"key": "newsStatus", "value": "1"}, {"key": "categoryID", "value": "{{createdCategoryID}}"}]}},
+          "response": []
+        },
+        {
+          "name": "Get All News Articles - Date Range Filter",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Date range results returned\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.newsArticles.items).to.be.an('array');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "GET", "header": [], "url": {"raw": "{{base_url}}/api/news-articles?createdDateFrom=2026-01-01&createdDateTo=2026-12-31", "host": ["{{base_url}}"], "path": ["api", "news-articles"], "query": [{"key": "createdDateFrom", "value": "2026-01-01"}, {"key": "createdDateTo", "value": "2026-12-31"}]}},
+          "response": []
+        },
+        {
+          "name": "Create News Article - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 201 Created\", function () {\n    pm.expect(pm.response.code).to.equal(201);\n});\npm.test(\"Response is success\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.isSuccess).to.be.true;\n});\npm.test(\"New article returned with ID\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.value.data).to.have.property('newsArticleID');\n    pm.expect(jsonData.value.data.newsTitle).to.equal('New Research Breakthrough');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"New Research Breakthrough\",\n  \"headline\": \"Faculty achieves major research milestone\",\n  \"newsContent\": \"Content about the research breakthrough...\",\n  \"newsSource\": \"Research Department\",\n  \"categoryID\": 3,\n  \"newsStatus\": 1\n}"}, "url": {"raw": "{{base_url}}/api/news-articles", "host": ["{{base_url}}"], "path": ["api", "news-articles"]}},
+          "response": []
+        },
+        {
+          "name": "Create News Article - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"\",\n  \"headline\": \"\",\n  \"newsContent\": \"\",\n  \"newsSource\": \"\",\n  \"categoryID\": -1,\n  \"newsStatus\": 5\n}"}, "url": {"raw": "{{base_url}}/api/news-articles", "host": ["{{base_url}}"], "path": ["api", "news-articles"]}},
+          "response": []
+        },
+        {
+          "name": "Create News Article - Category Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"New Article\",\n  \"headline\": \"Headline\",\n  \"newsContent\": \"Content\",\n  \"newsSource\": \"Source\",\n  \"categoryID\": 99999,\n  \"newsStatus\": 1\n}"}, "url": {"raw": "{{base_url}}/api/news-articles", "host": ["{{base_url}}"], "path": ["api", "news-articles"]}},
+          "response": []
+        },
+        {
+          "name": "Update News Article - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Updated article data returned\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('newsArticleID');\n    pm.expect(jsonData).to.have.property('newsTitle');\n    pm.expect(jsonData.newsTitle).to.equal('Updated Article Title');\n    pm.environment.set('createdNewsArticleTitle', jsonData.newsTitle);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"Updated Article Title\",\n  \"headline\": \"Updated Headline\",\n  \"newsContent\": \"Updated content...\",\n  \"newsSource\": \"Updated Source\",\n  \"categoryID\": {{createdCategoryID}},\n  \"newsStatus\": 1\n}"}, "url": {"raw": "{{base_url}}/api/news-articles/{{createdNewsArticleID}}", "host": ["{{base_url}}"], "path": ["api", "news-articles", "{{createdNewsArticleID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Update News Article - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"Updated\",\n  \"headline\": \"Updated\",\n  \"newsContent\": \"Updated\",\n  \"newsSource\": \"Source\",\n  \"categoryID\": 1,\n  \"newsStatus\": 1\n}"}, "url": {"raw": "{{base_url}}/api/news-articles/99999", "host": ["{{base_url}}"], "path": ["api", "news-articles", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Update News Article - Invalid Data",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 400 Bad Request\", function () {\n    pm.expect(pm.response.code).to.equal(400);\n});\npm.test(\"Response has validation errors\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('errors');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"newsTitle\": \"\",\n  \"headline\": \"\",\n  \"newsContent\": \"\",\n  \"newsSource\": \"\",\n  \"categoryID\": 1,\n  \"newsStatus\": 1\n}"}, "url": {"raw": "{{base_url}}/api/news-articles/{{createdNewsArticleID}}", "host": ["{{base_url}}"], "path": ["api", "news-articles", "{{createdNewsArticleID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete News Article - Success",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 200\", function () {\n    pm.expect(pm.response.code).to.equal(200);\n});\npm.test(\"Response has success message\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property('message');\n    pm.expect(jsonData.message.toLowerCase()).to.include('deleted successfully');\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/news-articles/{{createdNewsArticleID}}", "host": ["{{base_url}}"], "path": ["api", "news-articles", "{{createdNewsArticleID}}"]}},
+          "response": []
+        },
+        {
+          "name": "Delete News Article - Not Found",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 500\", function () {\n    pm.expect(pm.response.code).to.equal(500);\n});\npm.test(\"Response indicates error\", function () {\n    var jsonData = pm.response.json();\n    var isSuccess = jsonData.isSuccess !== undefined ? jsonData.isSuccess : jsonData.IsSuccess;\n    var error = jsonData.error || jsonData.Error;\n    pm.expect(isSuccess).to.be.false;\n    pm.expect(error).to.not.be.undefined;\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/news-articles/99999", "host": ["{{base_url}}"], "path": ["api", "news-articles", "99999"]}},
+          "response": []
+        },
+        {
+          "name": "Delete News Article - Unauthorized (Not Admin)",
+          "event": [{"listen": "test", "script": {"exec": ["pm.test(\"Status code is 403 Forbidden\", function () {\n    pm.expect(pm.response.code).to.equal(403);\n});\n"]}}],
+          "request": {"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]}, "method": "DELETE", "header": [], "url": {"raw": "{{base_url}}/api/news-articles/1", "host": ["{{base_url}}"], "path": ["api", "news-articles", "1"]}},
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:5000", "type": "string"},
+    {"key": "token", "value": "", "type": "string"},
+    {"key": "createdAccountID", "value": "", "type": "string"},
+    {"key": "createdAccountName", "value": "", "type": "string"},
+    {"key": "createdAccountEmail", "value": "", "type": "string"},
+    {"key": "createdCategoryID", "value": "", "type": "string"},
+    {"key": "createdCategoryName", "value": "", "type": "string"},
+    {"key": "createdTagID", "value": "", "type": "string"},
+    {"key": "createdTagName", "value": "", "type": "string"},
+    {"key": "createdNewsArticleID", "value": "", "type": "string"},
+    {"key": "createdNewsArticleTitle", "value": "", "type": "string"}
+  ]
+}
